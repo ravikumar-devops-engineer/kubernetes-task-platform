@@ -1,0 +1,14 @@
+Q-> Why does PVC remain Pending with WaitForFirstConsumer ?
+Ans -> WaitForFirstConsumer delays volume provisioning binding until a Pod that uses the PVC is scheduled.
+This allows kubernetes to consider the pod's scheduling constraints before selecting provisiong storage.
+
+Previously we used one manually created PVC:
+statefulSet -> mongodb-0 -> mongodb-PVC
+
+That's okay for learning , but statefulSet have much better mechanism:
+volumeClaimTemplates:
+it allows kubernetes to automatically create a separate PVC for each statefullset pod.
+
+This tells the statefullset controller:
+  Create a PVC for each statefulset pod.
+
