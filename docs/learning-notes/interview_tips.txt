@@ -12,3 +12,86 @@ it allows kubernetes to automatically create a separate PVC for each statefullse
 This tells the statefullset controller:
   Create a PVC for each statefulset pod.
 
+
+Request -> what kubernetes reserves/uses for scheduling
+
+Limit -> maximum resource usage allowed for the container.
+
+how to label a node for node selector
+------------------------------
+kubectl label node prod-cluster-worker2 workload=backend
+
+To use node selector for deployment need to use the label for the node. 
+if node label match with node selector label . then only the pod replica will be scheduled on the node.
+otherwise it will be in pending state.
+
+Taints & Tolerations.
+-------------------------
+
+node selector -> controls where a pod can go.
+Taint -> controls which pods are allowd onto a node. (Don't schedule pods here unless they are permitted.)
+
+Tolerations -> Gives a Pod permission to tolerate a matching taint.
+Taint on node ---matches ----- Tolerations on pod.
+
+kubectl taint nodes prod-cluster-worker3 workload=database:NoSchedule
+what does Noschedule mean?
+Ans -> kubernetes will not schedule new pods onto the node unless they tolerate the taint.
+
+it does not automatically evict existing pods.
+
+There are three main effects:
+NoSchedule -> Don't schedule new non-tolerating pods
+PreferNoSchedule -> Try to avoid scheduling them
+NoExecute -> don't schedule + can evict existing non-tolerating pods.
+
+important interview concept:
+A toleration does not force a pod onto a node. it only says 
+This pod is allowed to run there.
+
+The scheduler can still choose another suitable node.
+
+usecase:
+if you want only database pod should run on worker 3
+the use both :
+taint, tolerations and node selector.
+
+Q-> you have dedicated database node. how would you prevent normal application pods from being scheduled there ?
+Ans -> I would apply a taint such as workload=database:NoSchedule to the node. only pods with the corrosponding tolerations can be scheduled there. if i want database pods specifically 
+on that node, i would additionally use a node label with node selector or node affinity.
+
+
+Q- why do we need Node affinity?
+Ans -> nodeSelector is simple
+it means pod must run on a node having workload=backend
+But sometimes we need more flexible rules.
+
+Ex-> prefer nodes with SSD storage, but if they are unavialable, another node is okay.
+That's where node affinity comes in.
+
+Two important types:
+
+requiredDuringSchedulingIgnoredDuringExecution
+hard requirement -> must match -> otherwise pod stays pending.
+
+preferredDuringSchedulingIgnoreDuringExecution
+soft preferrence - prefer match node -> if available -> can use another suitable node.
+
+kubectl label node prod-cluster-worker4 disk=ssd
+
+
+pod anti-affinity HA concept
+==========================
+imagine frontend replicas are placed on node 1
+and if node 1 dies , then all your replicas for frontend will be die 
+so, that's bad HA.
+
+We can tell kubernetes:
+Don't place replicas of this application on the same node.
+
+That's pod anti-affinity.
+
+Q-> Difference between node affinity and pod anti-affinity?
+Ans -> Node affinity controls pod placement based on node labels, whereas pod anti-affinity controls 
+pod placement based on the other pods. For ex -> node affinity can place a workload on SSD nodes, 
+while pod anti-affinity can distribute replicas across different nodes for high availability.

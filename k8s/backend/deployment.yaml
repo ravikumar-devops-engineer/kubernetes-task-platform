@@ -19,6 +19,8 @@ spec:
         app: backend
 
     spec:
+      nodeSelector:
+        workload: backend
       containers:
         - name: backend
           image: task-platform-backend:1.0
@@ -32,3 +34,12 @@ spec:
 
           ports:
             - containerPort: 5000
+
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
