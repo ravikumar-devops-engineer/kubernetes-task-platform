@@ -95,3 +95,17 @@ Q-> Difference between node affinity and pod anti-affinity?
 Ans -> Node affinity controls pod placement based on node labels, whereas pod anti-affinity controls 
 pod placement based on the other pods. For ex -> node affinity can place a workload on SSD nodes, 
 while pod anti-affinity can distribute replicas across different nodes for high availability.
+
+Q- What is the difference between pod anti-affinity and topology spread constraints?
+Ans -> 
+pod anti-affinity can prevent pods from being placed together based on other pod labels, while topology
+spread constraints provide more explicit control over how evenly pods are distributed across topology domains
+such as nodes or availability zones.
+
+Pod pending Troubleshooting flow
+============================
+pod pending --> kubectl describe pod --> Check events --> Identify reason --> check resources -> check node labels
+-> check taints/tolerations -> check node affinity -> check topology constraints
+-> fix the actual constraints
+
+

@@ -19,6 +19,13 @@ spec:
         app: frontend
 
     spec:
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              app: frontend
       containers:
         - name: frontend
           image: task-platform-frontend:1.0
