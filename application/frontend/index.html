@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kubernetes Task Platform</title>
+</head>
+
+<body>
+
+    <h1>Kubernetes Task Platform</h1>
+
+    <button id="loadTasks">Load Tasks</button>
+
+    <ul id="tasks"></ul>
+
+    <p id="error"></p>
+
+    <script>
+        document.getElementById("loadTasks").addEventListener("click", loadTasks);
+
+        async function loadTasks() {
+            const list = document.getElementById("tasks");
+            const error = document.getElementById("error");
+
+            list.innerHTML = "";
+            error.textContent = "";
+
+            try {
+                const response = await fetch("/api/tasks");
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error: ${response.status}`);
+                }
+
+                const tasks = await response.json();
+
+                tasks.forEach(task => {
+                    const item = document.createElement("li");
+                    item.textContent = `${task.title} - ${task.status}`;
+                    list.appendChild(item);
+                });
+
+            } catch (err) {
+                console.error(err);
+                error.textContent = "Failed to load tasks: " + err.message;
+            }
+        }
+    </script>
+
+</body>
+</html>

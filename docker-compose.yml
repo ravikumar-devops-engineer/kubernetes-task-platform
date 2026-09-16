@@ -1,0 +1,28 @@
+services:
+
+  backend:
+    build:
+      context: ./application/backend
+    image: task-platform-backend:1.0
+    container_name: task-backend
+    expose:
+      - "5000"
+
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+  frontend:
+    build:
+      context: ./application/frontend
+    image: task-platform-frontend:1.0
+    container_name: task-frontend
+    ports:
+      - "8080:80"
+
+    depends_on:
+      backend:
+        condition: service_healthy

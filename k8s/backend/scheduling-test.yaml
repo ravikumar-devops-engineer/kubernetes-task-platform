@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: scheduling-test
+  namespace: task-platform
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: scheduling-test
+
+  template:
+    metadata:
+      labels:
+        app: scheduling-test
+
+    spec:
+      nodeSelector:
+        workload: nonexistent
+
+      containers:
+        - name: nginx
+          image: nginx:latest
+
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
