@@ -1,16 +1,62 @@
-# kubernetes-task-platform
-A Kubernetes task automation and platform management project.
+# Kubernetes Task Platform
 
-To start the application port forward is needed for kind cluster.
-kubectl port-forward -n ingress-nginx service/ingress-nginx-controller 8080:80
+A hands-on Kubernetes project built using *Kind* to deploy and manage a multi-tier Task Platform application.
 
+## Architecture
 
-To check the taints for the nodes
-$ kubectl get nodes -o custom-columns=NAME:.metadata.name,TAINTS:.spec.taints
-NAME                         TAINTS
-prod-cluster-control-plane   [map[effect:NoSchedule key:node-role.kubernetes.io/control-plane]]
-prod-cluster-worker          <none>
-prod-cluster-worker2         <none>
-prod-cluster-worker3         [map[effect:NoSchedule key:workload value:database]]
-prod-cluster-worker4         <none>
+User → Ingress → Frontend → Backend → MongoDB → Persistent Storage
 
+## Technologies
+
+- Kubernetes
+- Kind
+- Docker
+- YAML
+- NGINX Ingress
+- MongoDB
+
+## Kubernetes Concepts
+
+- Deployments & ReplicaSets
+- Services
+- ConfigMaps & Secrets
+- Liveness & Readiness Probes
+- Ingress
+- PV / PVC / StorageClass
+- StatefulSet
+- Resource Requests & Limits
+- Node Scheduling
+- Taints & Tolerations
+- HPA
+- Rolling Updates & Rollbacks
+- NetworkPolicy
+- RBAC & ServiceAccount
+- PodDisruptionBudget
+
+## Troubleshooting
+
+Practical scenarios covered:
+
+- Pending Pods
+- CrashLoopBackOff
+- CPU/Memory issues
+- Service connectivity
+- Scheduling issues
+- Storage/PVC issues
+- Node maintenance
+
+## Documentation
+
+Hands-on learning notes are available in the docs/ directory.
+
+## Future Improvements
+
+- GitHub Actions CI/CD
+- Prometheus & Grafana
+- Centralized Logging
+- Security Scanning
+- Argo CD / GitOps
+- TLS/HTTPS
+- OpenShift Project
+
+*Goal:* Build strong practical Kubernetes and DevOps skills through hands-on implementation and troubleshooting.
