@@ -108,4 +108,53 @@ pod pending --> kubectl describe pod --> Check events --> Identify reason --> ch
 -> check taints/tolerations -> check node affinity -> check topology constraints
 -> fix the actual constraints
 
+HPA 
+minium replicas = 2
+maximum replicas = 5
+CPU target = 60%
+
+conceptually
+CPU increase aboube 60% then increase replicas  2 to 5
+
+when load decreases
+5 to 2
+
+
+Q-> what is the difference between maxSurge and maxUnavailble ?
+Ans -> 
+maxSurge controls how many additional Pods can be created above the desired replica count
+during a rolling update, while maxUnavailable controls how many pods can be unavialable during the update.
+
+
+I Created a dedicated ServiceAccount for the backend and used a namespace-scoped Role with only 
+the required ConfigMap permissions. I verified the permissions using kubectl auth can-i 
+
+Note: if your backend application simplly does frontend -> backend API -> MongoDB 
+and never calls the kubernetes API, then it does not need a custom ServiceAccount.
+
+We don't actually need to give the backend permission to read ConfigMaps just for the sake of it.
+A better project design would be to only create the ServiceAccount/RBAC if we have a backend feature
+that genuinely needs kubernetes API access.
+
+PodDisruptionBudget (PDB)
+==========================
+PDB is used to protect your application from voluntary disruptions, such as 
+- Node maintainance
+- Node drain
+- Cluster upgrades
+- Kubernetes administrator evicting Pods
+
+in backend currently has 2 replicas, so we will ensure at least 1 backend pod remains available during a 
+voluntary disruption.
+Note: PDB does not protect against every failure.
+for ex - if a node suddenly crashes:
+Node failure -> pods disappear
+
+PDB does not magically keep the pod running. 
+PDB mainly controls voluntary Pod disruption eviction.
+
+
+
+
+
 

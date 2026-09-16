@@ -20,6 +20,7 @@ spec:
     spec:
       nodeSelector:
         workload: backend
+      serviceAccountName: backend-sa
       containers:
         - name: backend
           image: task-platform-backend:1.0
