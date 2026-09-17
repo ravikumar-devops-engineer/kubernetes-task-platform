@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  security-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build Backend image
+        run: docker build -t task-platform-backend:1.0 ./application/backend
+      
+      - name: Build Frontend image
+        run: docker build -t task-platform-frontend:1.0 ./application/frontend
+
+      - name: Scan Backend image
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: task-platform-backend:1.0
+          serverity: HIGH,CRITICAL
+          exit-code: 1
+
+      - name: Scan Frontend image
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: task-platform-frontend:1.0
+          serverity: HIGH,CRITICAL
+          exit-code: 1

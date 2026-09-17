@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: quota-exceed-test
+  namespace: task-platform
+spec:
+  containers:
+    - name: nginx
+      image: nginx:latest
+      resources:
+        requests:
+          cpu: "1.5"
+          memory: 1.5Gi
+        limits:
+          cpu: "1.5"
+          memory: 1.5Gi

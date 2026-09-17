@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: task-platform-limits
+  namespace: task-platform
+
+spec: 
+  limits:
+    - type: Container
+      default: 
+        cpu: "500m"
+        memory: "512Mi"
+      defaultRequest:
+        cpu: "100m"
+        memory: 128Mi

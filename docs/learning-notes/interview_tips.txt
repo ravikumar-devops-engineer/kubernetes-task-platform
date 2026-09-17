@@ -154,7 +154,159 @@ PDB does not magically keep the pod running.
 PDB mainly controls voluntary Pod disruption eviction.
 
 
+ResourceQuota :- controls the total resources used by the namespaces
+
+LimitRange :- controls default/min/max resources for individual containers.
+
+limitRange 
+==========
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: task-platform-limits
+  namespace: task-platform
+
+spec: 
+  limits:
+    - type: Container
+      default: 
+        cpu: "500m"
+        memory: "512Mi"
+      defaultRequest:
+        cpu: "100m"
+        memory: 128Mi
+
+Scope:
+Applies to containers inside pods in the task-platform namespace.
+
+default:
+If you don’t specify resource limits in your pod spec, Kubernetes will automatically assign:
+
+CPU limit = 500m (half a CPU core)
+
+Memory limit = 512Mi (512 MB)
+
+defaultRequest:
+If you don’t specify resource requests in your pod spec, Kubernetes will automatically assign:
+
+CPU request = 100m (0.1 CPU core guaranteed)
+
+Memory request = 128Mi (128 MB guaranteed)
+
+RequestQuota
+===============
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: task-platform-quota
+  namespace: task-platform
+spec:
+  hard:
+    requests.cpu: "2"
+    requests.memory: 2Gi
+    limits.cpu: "4"
+    limits.memory: 4Gi
+    pods: "10"
+
+requests.cpu: "2"  
+→ Across all pods in the namespace, the total CPU requests cannot exceed 2 cores.
+(Requests = guaranteed minimum CPU the scheduler reserves.)
+
+requests.memory: 2Gi  
+→ Across all pods, the total memory requests cannot exceed 2 GiB.
+(Requests = guaranteed minimum memory reserved.)
+
+limits.cpu: "4"  
+→ Across all pods, the total CPU limits cannot exceed 4 cores.
+(Limits = maximum CPU a pod can use if available.)
+
+limits.memory: 4Gi  
+→ Across all pods, the total memory limits cannot exceed 4 GiB.
+(Limits = maximum memory a pod can use before being OOMKilled.)
+
+pods: "10"  
+→ You can only create up to 10 pods in this namespace.
 
 
 
 
+A pod’s request must be ≤ limit.
+
+QoS Classes
+============================
+1. Guaranteed
+Condition: Every container in the pod has equal CPU and memory requests = limits.
+Effect: Pod gets the highest priority. It’s the last to be evicted under resource pressure.
+Example:
+yaml
+resources:
+  requests:
+    cpu: "500m"
+    memory: "512Mi"
+  limits:
+    cpu: "500m"
+    memory: "512Mi"
+
+2. Burstable
+Condition: Pod has requests < limits, or some containers specify requests while others don’t.
+
+Effect: Pod gets medium priority. It’s guaranteed its request, but can burst up to its limit if resources are free.
+
+Example (your case):
+
+yaml
+resources:
+  requests:
+    cpu: "100m"
+    memory: "128Mi"
+  limits:
+    cpu: "500m"
+    memory: "512Mi"
+→ This pod is Burstable because request (100m) < limit (500m).
+
+3. BestEffort
+Condition: Pod has no requests or limits defined at all.
+
+Effect: Pod gets the lowest priority. It can use resources opportunistically, but is the first to be evicted under pressure.
+
+Example:
+
+yaml
+resources: {}
+
+
+============================
+Requests = guaranteed slice of CPU/memory.
+
+Limits = maximum burst allowed.
+
+Quota enforcement:
+
+Kubernetes checks requests first.
+
+If your pod requests exceed the quota (e.g., 3 CPUs > 2 CPUs quota), admission fails.
+
+Even though the namespace allows up to 4 CPUs in limits, you can’t reach that unless your requests are within the quota.
+
+⚙️ How to Actually Use Full Limits
+You can only hit the limit quota (4 CPU, 4Gi) if:
+
+Your requests stay ≤ 2 CPU and ≤ 2Gi (namespace quota).
+
+Your limits can then be set higher (up to 4 CPU, 4Gi).
+
+👉 Example pod that works:
+
+yaml
+resources:
+  requests:
+    cpu: "1.5"
+    memory: "1.5Gi"
+  limits:
+    cpu: "3"
+    memory: "3Gi"
+Requests (1.5 CPU, 1.5Gi) fit under quota (2 CPU, 2Gi).
+
+Limits (3 CPU, 3Gi) fit under quota (4 CPU, 4Gi).
+
+✅ Pod admitted, can burst up to 3 CPU/3Gi.
